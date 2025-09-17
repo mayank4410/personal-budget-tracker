@@ -1,0 +1,35 @@
+{
+  "name": "personal-budget-tracker",
+  "version": "1.0.0",
+  "description": "A Personal Budget Tracker app using Node.js, Express, MongoDB, and Vanilla JS frontend",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "server": "nodemon backend/server.js",
+    "client": "five-server frontend",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [
+    "budget",
+    "tracker",
+    "finance",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "Mayank Singh",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^7.5.0"
+  },
+  "devDependencies": {
+    "five-server": "^0.4.4",
+    "nodemon": "^3.0.1"
+  }
+}

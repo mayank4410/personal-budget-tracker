@@ -1,0 +1,99 @@
+/* ================================
+   Global Styles
+================================ */
+body {
+  background-color: #f8f9fa; /* light gray background */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h3, h5 {
+  font-weight: 600;
+}
+
+/* ================================
+   Navbar
+================================ */
+.navbar {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* ================================
+   Cards
+================================ */
+.card {
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* ================================
+   Tables
+================================ */
+table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table th {
+  background-color: #212529;
+  color: #fff;
+}
+
+.table td, 
+.table th {
+  vertical-align: middle;
+}
+
+/* ================================
+   Forms
+================================ */
+form label {
+  font-weight: 500;
+}
+
+form .btn {
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* ================================
+   Summary Cards (Dashboard)
+================================ */
+#total-income {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+#total-expenses {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+#balance {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+/* ================================
+   Charts
+================================ */
+canvas {
+  max-height: 350px;
+}
+
+/* ================================
+   Utilities
+================================ */
+.text-muted {
+  font-style: italic;
+}
