@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 README.md
 # Personal Budget Tracker
 
@@ -116,3 +117,7 @@ This project is licensed under the MIT License.
 Agar chaho toh mai ab **`db.js` aur `server.js`** ka full ready-to-run code bhi tumhare liye bana doon, jisse turant project chal jaye.  
 
 Kya mai wo bana doon?
+=======
+# personal-budget-tracker
+Personal Budget Tracker: A full-stack web application to manage personal finances efficiently. Built with Node.js, Express, MongoDB, and a responsive frontend. Features include user authentication, secure JWT-based login, CRUD operations for transactions, and real-time expense tracking.
+>>>>>>> 8e09506b2d3689b82aa37f757a9fb943724fecb9
