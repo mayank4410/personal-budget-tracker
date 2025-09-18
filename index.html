@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Budget Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .dashboard {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: #3498db;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-card.expenses {
+            background: #e74c3c;
+        }
+
+        .summary-card.balance {
+            background: #27ae60;
+        }
+
+        .summary-card h3 {
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .summary-card .amount {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            padding: 5px 10px;
+            font-size: 12px;
+            width: auto;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .tabs {
+            display: flex;
+            list-style: none;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tabs li {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .tabs a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tabs a.active {
+            background: white;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar select, .filter-bar input {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .filter-bar button {
+            width: auto;
+            padding: 10px 15px;
+        }
+
+        .progress {
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            background: #3498db;
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-bar.danger {
+            background: #e74c3c;
+        }
+
+        .budget-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #3498db;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .badge.income {
+            background: #27ae60;
+        }
+
+        .badge.expense {
+            background: #e74c3c;
+        }
+
+        /* Chat Styles */
+        .chat-container {
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .message.sent {
+            background: #3498db;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.received {
+            background: #e6e6e6;
+        }
+
+        .message-header {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: white;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            width: auto;
+        }
+
+        /* Report Styles */
+        .report-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .report-controls select, .report-controls input {
+            min-width: 150px;
+        }
+
+        .report-section {
+            margin-bottom: 30px;
+        }
+
+        .report-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .report-summary-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .report-summary-item h4 {
+            margin-bottom: 10px;
+            color: #7f8c8d;
+        }
+
+        .report-summary-item .amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .report-table {
+            margin-bottom: 20px;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .tabs a {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .notification.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Personal Budget Tracker</h1>
+        </header>
+
+        <div class="main-content">
+            <aside class="sidebar">
+                <div>
+                    <h3>Quick Summary</h3>
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Income:</strong> <span id="total-income">₹0.00</span></p>
+                        <p><strong>Expenses:</strong> <span id="total-expenses">₹0.00</span></p>
+                        <p><strong>Balance:</strong> <span id="net-balance">₹0.00</span></p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Add Transaction</h3>
+                    <form id="transaction-form">
+                        <div class="form-group">
+                            <label for="type">Type</label>
+                            <select id="type" required>
+                                <option value="income">Income</option>
+                                <option value="expense">Expense</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">Amount (₹)</label>
+                            <input type="number" id="amount" step="0.01" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select id="category" required>
+                                <option value="">Select category</option>
+                                <option value="salary">Salary</option>
+                                <option value="freelance">Freelance</option>
+                                <option value="investment">Investment</option>
+                                <option value="food">Food</option>
+                                <option value="transport">Transport</option>
+                                <option value="entertainment">Entertainment</option>
+                                <option value="utilities">Utilities</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="notes">Notes</label>
+                            <input type="text" id="notes" placeholder="Optional">
+                        </div>
+                        <button type="submit">Add Transaction</button>
+                    </form>
+                </div>
+            </aside>
+
+            <main class="dashboard">
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Total Income</h3>
+                        <div class="amount" id="dashboard-income">₹0.00</div>
+                    </div>
+                    <div class="summary-card expenses">
+                        <h3>Total Expenses</h3>
+                        <div class="amount" id="dashboard-expenses">₹0.00</div>
+                    </div>
+                    <div class="summary-card balance">
+                        <h3>Net Balance</h3>
+                        <div class="amount" id="dashboard-balance">₹0.00</div>
+                    </div>
+                </div>
+
+                <ul class="tabs">
+                    <li><a href="#" class="tab-link active" data-tab="dashboard">Dashboard</a></li>
+                    <li><a href="#" class="tab-link" data-tab="transactions">Transactions</a></li>
+                    <li><a href="#" class="tab-link" data-tab="budgets">Budgets</a></li>
+                    <li><a href="#" class="tab-link" data-tab="chat">Group Chat</a></li>
+                    <li><a href="#" class="tab-link" data-tab="reports">Reports</a></li>
+                </ul>
+
+                <!-- Dashboard Tab -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <div class="chart-container">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div id="transactions-tab" class="tab-content">
+                    <div class="filter-bar">
+                        <select id="filter-type">
+                            <option value="">All Types</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                        <select id="filter-category">
+                            <option value="">All Categories</option>
+                            <option value="salary">Salary</option>
+                            <option value="freelance">Freelance</option>
+                            <option value="investment">Investment</option>
+                            <option value="food">Food</option>
+                            <option value="transport">Transport</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="shopping">Shopping</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <button onclick="applyFilters()">Filter</button>
+                    </div>
+                    
+                    <table id="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Budgets Tab -->
+                <div id="budgets-tab" class="tab-content">
+                    <div style="margin-bottom: 30px;">
+                        <h3>Set Budget</h3>
+                        <form id="budget-form" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+                            <div class="form-group">
+                                <label for="budget-category">Category</label>
+                                <select id="budget-category" required>
+                                    <option value="">Select category</option>
+                                    <option value="food">Food</option>
+                                    <option value="transport">Transport</option>
+                                    <option value="entertainment">Entertainment</option>
+                                    <option value="utilities">Utilities</option>
+                                    <option value="shopping">Shopping</option>
+                                    <option value="healthcare">Healthcare</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="budget-amount">Amount (₹)</label>
+                                <input type="number" id="budget-amount" step="0.01" min="0" required>
+                            </div>
+                            <button type="submit" style="width: auto; padding: 10px 15px;">Set Budget</button>
+                        </form>
+                    </div>
+
+                    <div id="budget-progress">
+                        <!-- Budget items will be shown here -->
+                    </div>
+                </div>
+
+                <!-- Group Chat Tab -->
+                <div id="chat-tab" class="tab-content">
+                    <div class="form-group">
+                        <label for="username">Your Name</label>
+                        <input type="text" id="username" placeholder="Enter your name" value="User">
+                    </div>
+                    
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <!-- Chat messages will appear here -->
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="message-input" placeholder="Type your message...">
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Tab -->
+                <div id="reports-tab" class="tab-content">
+                    <div class="report-controls">
+                        <div class="form-group">
+                            <label for="report-period">Period</label>
+                            <select id="report-period">
+                                <option value="month">This Month</option>
+                                <option value="last-month">Last Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="custom-range" style="display: none;">
+                            <label for="start-date">Start Date</label>
+                            <input type="date" id="start-date">
+                        </div>
+                        <div class="form-group" id="custom-range-end" style="display: none;">
+                            <label for="end-date">End Date</label>
+                            <input type="date" id="end-date">
+                        </div>
+                        <div class="form-group" style="align-self: end;">
+                            <button onclick="generateReport()">Generate Report</button>
+                        </div>
+                    </div>
+
+                    <div id="report-content">
+                        <p>Select a period and generate a report to view your financial insights.</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Data storage
+        let transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+        let budgets = JSON.parse(localStorage.getItem('budgets') || '[]');
+        let chatMessages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+
+        // DOM elements
+        const transactionForm = document.getElementById('transaction-form');
+        const budgetForm = document.getElementById('budget-form');
+        const tabLinks = document.querySelectorAll('.tab-link');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const reportPeriod = document.getElementById('report-period');
+
+        // Chart
+        let expenseChart = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            setupEventListeners();
+            updateDashboard();
+            renderTransactions();
+            renderBudgets();
+            renderChatMessages();
+            
+            // Set up report period change listener
+            reportPeriod.addEventListener('change', function() {
+                const customRange = document.getElementById('custom-range');
+                const customRangeEnd = document.getElementById('custom-range-end');
+                if (this.value === 'custom') {
+                    customRange.style.display = 'block';
+                    customRangeEnd.style.display = 'block';
+                } else {
+                    customRange.style.display = 'none';
+                    customRangeEnd.style.display = 'none';
+                }
+            });
+        });
+
+        function setupEventListeners() {
+            transactionForm.addEventListener('submit', addTransaction);
+            budgetForm.addEventListener('submit', addBudget);
+            
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    switchTab(this.getAttribute('data-tab'));
+                });
+            });
+            
+            // Allow sending message with Enter key
+            document.getElementById('message-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        function switchTab(tabId) {
+            tabLinks.forEach(link => link.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+            
+            if (tabId === 'dashboard') {
+                updateChart();
+            }
+        }
+
+        function addTransaction(e) {
+            e.preventDefault();
+            
+            const transaction = {
+                id: Date.now(),
+                type: document.getElementById('type').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                category: document.getElementById('category').value,
+                date: document.getElementById('date').value,
+                notes: document.getElementById('notes').value
+            };
+            
+            transactions.push(transaction);
+            saveData();
+            transactionForm.reset();
+            document.getElementById('date').value = new Date().toISOString().split('T')[0];
+            
+            updateDashboard();
+            renderTransactions();
+            renderBudgets();
+            showNotification('Transaction added successfully!');
+        }
+
+        function addBudget(e) {
+            e.preventDefault();
+            
+            const category = document.getElementById('budget-category').value;
+            const amount = parseFloat(document.getElementById('budget-amount').value);
+            
+            const existingIndex = budgets.findIndex(b => b.category === category);
+            if (existingIndex !== -1) {
+                budgets[existingIndex].amount = amount;
+            } else {
+                budgets.push({ id: Date.now(), category, amount });
+            }
+            
+            saveData();
+            budgetForm.reset();
+            renderBudgets();
+            showNotification('Budget updated successfully!');
+        }
+
+        function deleteTransaction(id) {
+            if (confirm('Delete this transaction?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveData();
+                updateDashboard();
+                renderTransactions();
+                renderBudgets();
+                showNotification('Transaction deleted!');
+            }
+        }
+
+        function deleteBudget(id) {
+            if (confirm('Delete this budget?')) {
+                budgets = budgets.filter(b => b.id !== id);
+                saveData();
+                renderBudgets();
+                showNotification('Budget deleted!');
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            localStorage.setItem('budgets', JSON.stringify(budgets));
+            localStorage.setItem('chatMessages', JSON.stringify(chatMessages));
+        }
+
+        function formatCurrency(amount) {
+            return '₹' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        function updateDashboard() {
+            const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+            const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+            const netBalance = totalIncome - totalExpenses;
+            
+            document.getElementById('total-income').textContent = formatCurrency(totalIncome);
+            document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('net-balance').textContent = formatCurrency(netBalance);
+            document.getElementById('dashboard-income').textContent = formatCurrency(totalIncome);
+            document.getElementById('dashboard-expenses').textContent = formatCurrency(totalExpenses);
+            document.getElementById('dashboard-balance').textContent = formatCurrency(netBalance);
+            
+            updateChart();
+        }
+
+        function updateChart() {
+            const ctx = document.getElementById('expenseChart');
+            if (!ctx) return;
+            
+            const categoryData = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                categoryData[t.category] = (categoryData[t.category] || 0) + t.amount;
+            });
+            
+            const labels = Object.keys(categoryData);
+            const data = Object.values(categoryData);
+            
+            if (expenseChart) expenseChart.destroy();
+            
+            expenseChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: [
+                            '#3498db', '#e74c3c', '#f39c12', '#27ae60', '#9b59b6', '#1abc9c', '#34495e'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTransactions() {
+            const tbody = document.querySelector('#transactions-table tbody');
+            tbody.innerHTML = '';
+            
+            let filteredTransactions = [...transactions];
+            
+            const typeFilter = document.getElementById('filter-type').value;
+            const categoryFilter = document.getElementById('filter-category').value;
+            
+            if (typeFilter) filteredTransactions = filteredTransactions.filter(t => t.type === typeFilter);
+            if (categoryFilter) filteredTransactions = filteredTransactions.filter(t => t.category === categoryFilter);
+            
+            filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            filteredTransactions.forEach(transaction => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${new Date(transaction.date).toLocaleDateString()}</td>
+                    <td><span class="badge ${transaction.type}">${transaction.type}</span></td>
+                    <td>${transaction.category}</td>
+                    <td>${formatCurrency(transaction.amount)}</td>
+                    <td>${transaction.notes || '-'}</td>
+                    <td><button class="btn-danger" onclick="deleteTransaction(${transaction.id})">Delete</button></td>
+                `;
+            });
+        }
+
+        function renderBudgets() {
+            const container = document.getElementById('budget-progress');
+            container.innerHTML = '';
+            
+            if (budgets.length === 0) {
+                container.innerHTML = '<p>No budgets set. Add a budget to track your spending.</p>';
+                return;
+            }
+            
+            const spendingByCategory = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                spendingByCategory[t.category] = (spendingByCategory[t.category] || 0) + t.amount;
+            });
+            
+            budgets.forEach(budget => {
+                const spent = spendingByCategory[budget.category] || 0;
+                const percentage = Math.min(100, (spent / budget.amount) * 100);
+                const remaining = budget.amount - spent;
+                
+                const budgetItem = document.createElement('div');
+                budgetItem.className = 'budget-item';
+                budgetItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h4>${budget.category.charAt(0).toUpperCase() + budget.category.slice(1)}</h4>
+                        <button class="btn-danger" onclick="deleteBudget(${budget.id})">Delete</button>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar ${percentage > 100 ? 'danger' : ''}" style="width: ${Math.min(percentage, 100)}%"></div>
+                    </div>
+                    <p><strong>Spent:</strong> ${formatCurrency(spent)} / ${formatCurrency(budget.amount)} (${percentage.toFixed(1)}%)</p>
+                    <p><strong>Remaining:</strong> ${formatCurrency(remaining)}</p>
+                    ${remaining < 0 ? '<p style="color: #e74c3c; font-weight: bold;">Over Budget!</p>' : ''}
+                `;
+                container.appendChild(budgetItem);
+            });
+        }
+
+        function applyFilters() {
+            renderTransactions();
+        }
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const username = document.getElementById('username').value || 'User';
+            const message = input.value.trim();
+            
+            if (message) {
+                const newMessage = {
+                    id: Date.now(),
+                    username: username,
+                    message: message,
+                    timestamp: new Date().toISOString()
+                };
+                
+                chatMessages.push(newMessage);
+                saveData();
+                renderChatMessages();
+                input.value = '';
+                input.focus();
+                
+                // Auto-scroll to bottom
+                const chatContainer = document.getElementById('chat-messages');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
+
+        function renderChatMessages() {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+            
+            if (chatMessages.length === 0) {
+                container.innerHTML = '<p>No messages yet. Start the conversation!</p>';
+                return;
+            }
+            
+            chatMessages.forEach(msg => {
+                const messageEl = document.createElement('div');
+                messageEl.className = 'message';
+                
+                const time = new Date(msg.timestamp).toLocaleTimeString();
+                
+                messageEl.innerHTML = `
+                    <div class="message-header">${msg.username}</div>
+                    <div>${msg.message}</div>
+                    <div class="message-time">${time}</div>
+                `;
+                
+                container.appendChild(messageEl);
+            });
+            
+            // Auto-scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Report functionality
+        function generateReport() {
+            const period = document.getElementById('report-period').value;
+            let startDate, endDate;
+            
+            const today = new Date();
+            
+            switch(period) {
+                case 'month':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                case 'last-month':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+                case 'quarter':
+                    const quarter = Math.floor(today.getMonth() / 3);
+                    startDate = new Date(today.getFullYear(), quarter * 3, 1);
+                    endDate = new Date(today.getFullYear(), (quarter + 1) * 3, 0);
+                    break;
+                case 'year':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    endDate = new Date(today.getFullYear(), 11, 31);
+                    break;
+                case 'custom':
+                    const startInput = document.getElementById('start-date').value;
+                    const endInput = document.getElementById('end-date').value;
+                    
+                    if (!startInput || !endInput) {
+                        showNotification('Please select both start and end dates for custom range.');
+                        return;
+                    }
+                    
+                    startDate = new Date(startInput);
+                    endDate = new Date(endInput);
+                    break;
+            }
+            
+            // Filter transactions by date range
+            const filteredTransactions = transactions.filter(t => {
+                const transactionDate = new Date(t.date);
+                return transactionDate >= startDate && transactionDate <= endDate;
+            });
+            
+            // Calculate report data
+            const income = filteredTransactions
+                .filter(t => t.type === 'income')
+                .reduce((sum, t) => sum + t.amount, 0);
+                
+            const expenses = filteredTransactions
+                .filter(t => t.type === 'expense')
+                .reduce((sum, t) => sum + t.amount, 0);
+                
+            const balance = income - expenses;
+            
+            // Calculate expenses by category
+            const expensesByCategory = {};
+            filteredTransactions
+                .filter(t => t.type === 'expense')
+                .forEach(t => {
+                    expensesByCategory[t.category] = (expensesByCategory[t.category] || 0) + t.amount;
+                });
+            
+            // Render report
+            const reportContent = document.getElementById('report-content');
+            
+            let reportHTML = `
+                <div class="report-section">
+                    <h3>Financial Summary (${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()})</h3>
+                    <div class="report-summary">
+                        <div class="report-summary-item">
+                            <h4>Total Income</h4>
+                            <div class="amount">${formatCurrency(income)}</div>
+                        </div>
+                        <div class="report-summary-item">
+                            <h4>Total Expenses</h4>
+                            <div class="amount">${formatCurrency(expenses)}</div>
+                        </div>
+                        <div class="report-summary-item">
+                            <h4>Net Balance</h4>
+                            <div class="amount">${formatCurrency(balance)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add expenses by category
+            if (Object.keys(expensesByCategory).length > 0) {
+                reportHTML += `
+                    <div class="report-section">
+                        <h3>Expenses by Category</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                Object.entries(expensesByCategory).forEach(([category, amount]) => {
+                    const percentage = expenses > 0 ? (amount / expenses * 100).toFixed(1) : 0;
+                    reportHTML += `
+                        <tr>
+                            <td>${category}</td>
+                            <td>${formatCurrency(amount)}</td>
+                            <td>${percentage}%</td>
+                        </tr>
+                    `;
+                });
+                
+                reportHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            // Add transaction list
+            if (filteredTransactions.length > 0) {
+                reportHTML += `
+                    <div class="report-section">
+                        <h3>Transaction Details</h3>
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                filteredTransactions.sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .forEach(t => {
+                        reportHTML += `
+                            <tr>
+                                <td>${new Date(t.date).toLocaleDateString()}</td>
+                                <td><span class="badge ${t.type}">${t.type}</span></td>
+                                <td>${t.category}</td>
+                                <td>${formatCurrency(t.amount)}</td>
+                                <td>${t.notes || '-'}</td>
+                            </tr>
+                        `;
+                    });
+                
+                reportHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } else {
+                reportHTML += `<p>No transactions found for the selected period.</p>`;
+            }
+            
+            // Add export options
+            reportHTML += `
+                <div class="export-options">
+                    <button class="btn-secondary" onclick="exportReport('html')">Export as HTML</button>
+                    <button class="btn-secondary" onclick="exportReport('text')">Export as Text</button>
+                </div>
+            `;
+            
+            reportContent.innerHTML = reportHTML;
+        }
+
+        function exportReport(format) {
+            const reportContent = document.getElementById('report-content').innerHTML;
+            
+            if (format === 'html') {
+                const blob = new Blob([`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Budget Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                            th { background-color: #f2f2f2; }
+                            .badge { padding: 2px 6px; border-radius: 3px; color: white; }
+                            .badge.income { background-color: #27ae60; }
+                            .badge.expense { background-color: #e74c3c; }
+                            .report-summary { display: flex; gap: 15px; margin-bottom: 20px; }
+                            .report-summary-item { flex: 1; background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+                            .amount { font-size: 1.5rem; font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Budget Report</h1>
+                        ${reportContent}
+                    </body>
+                    </html>
+                `], { type: 'text/html' });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'budget-report.html';
+                a.click();
+                URL.revokeObjectURL(url);
+            } else if (format === 'text') {
+                // Create a simplified text version
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = reportContent;
+                
+                let textContent = "BUDGET REPORT\n\n";
+                
+                // Extract summary
+                const summaryItems = tempDiv.querySelectorAll('.report-summary-item');
+                summaryItems.forEach(item => {
+                    const title = item.querySelector('h4').textContent;
+                    const amount = item.querySelector('.amount').textContent;
+                    textContent += `${title}: ${amount}\n`;
+                });
+                
+                textContent += "\n";
+                
+                // Extract expenses by category
+                const categoryTable = tempDiv.querySelectorAll('.report-table')[0];
+                if (categoryTable) {
+                    textContent += "EXPENSES BY CATEGORY\n";
+                    const rows = categoryTable.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('th, td');
+                        let rowText = '';
+                        cells.forEach(cell => {
+                            rowText += cell.textContent + '\t';
+                        });
+                        textContent += rowText + '\n';
+                    });
+                }
+                
+                textContent += "\n";
+                
+                // Extract transactions
+                const transactionTable = tempDiv.querySelectorAll('.report-table')[1];
+                if (transactionTable) {
+                    textContent += "TRANSACTION DETAILS\n";
+                    const rows = transactionTable.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('th, td');
+                        let rowText = '';
+                        cells.forEach(cell => {
+                            rowText += cell.textContent + '\t';
+                        });
+                        textContent += rowText + '\n';
+                    });
+                }
+                
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'budget-report.txt';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
